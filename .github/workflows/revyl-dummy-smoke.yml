@@ -37,7 +37,7 @@ jobs:
         run: dd if=/dev/urandom of=artifact.apk bs=1024 count=200
       - name: Publish (presigned)
         run: |
-          node --loader ts-node/esm scripts/publishPresigned.ts \
+          npx tsx scripts/publishPresigned.ts \
             --file artifact.apk \
             --version "$VER" \
             --build-var "$REVYL_BUILD_VAR_ANDROID" \
@@ -51,6 +51,6 @@ jobs:
               "branch": "${{ github.ref_name }}"
             }'
       - name: Verify resolve
-        run: node --loader ts-node/esm scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
+        run: npx tsx scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
       - name: Trigger tests (pinned)
-        run: node --loader ts-node/esm scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke
+        run: npx tsx scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke

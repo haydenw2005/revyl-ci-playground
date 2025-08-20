@@ -40,7 +40,7 @@ jobs:
           # In a real scenario, you would run: eas build --platform android --profile preview --json --non-interactive
           echo "⚠️  Creating dummy build.json for testing purposes"
           echo "In production, this would be a real EAS build with APK artifact"
-          
+
           # Create a mock build.json that simulates EAS build output
           cat > build.json << 'EOF'
           {
@@ -58,14 +58,14 @@ jobs:
             ]
           }
           EOF
-          
+
           echo "📋 Mock build.json created:"
           cat build.json
       - name: Publish to Revyl (from_url)
         working-directory: apps/expo-minimal
         run: |
           URL=$(jq -r '.builds[0].artifacts.buildUrl' build.json)
-          node --loader ts-node/esm ../../scripts/publishFromUrl.ts \
+          npx tsx ../../scripts/publishFromUrl.ts \
             --from-url "$URL" \
             --version "$VER" \
             --build-var "$REVYL_BUILD_VAR_ANDROID" \
@@ -80,6 +80,6 @@ jobs:
               "branch": "${{ github.ref_name }}"
             }'
       - name: Verify resolve
-        run: node --loader ts-node/esm scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
+        run: npx tsx scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
       - name: Trigger tests (pinned)
-        run: node --loader ts-node/esm scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke
+        run: npx tsx scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke
