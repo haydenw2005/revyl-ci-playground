@@ -16,13 +16,13 @@ jobs:
       VER: rn-pr-${{ github.event.number }}-run-${{ github.run_number }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Checkout Revyl Actions
         uses: actions/checkout@v4
         with:
           repository: RevylAI/revyl-gh-action
           path: revyl-actions
-
+          
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -32,14 +32,14 @@ jobs:
           java-version: "17"
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-
+        
       - name: Install React Native dependencies
         working-directory: apps/rn-android-minimal
         run: |
           echo "📦 Installing React Native dependencies..."
           npm install
           echo "✅ Dependencies installed"
-
+          
       - name: Build Android Release (skip bundling for CI test)
         working-directory: apps/rn-android-minimal/android
         run: |
@@ -53,14 +53,13 @@ jobs:
             dd if=/dev/urandom of=app/build/outputs/apk/release/app-release.apk bs=1024 count=500
             echo "✅ Created test APK: $(ls -lh app/build/outputs/apk/release/app-release.apk)"
           }
-
+          
       - name: Upload to Revyl
         uses: ./revyl-actions/actions/upload-build
         with:
           build-var-id: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
           version: ${{ env.VER }}
           file-path: apps/rn-android-minimal/android/app/build/outputs/apk/release/app-release.apk
-          backend-url: ${{ secrets.REVYL_BASE_URL }}
           metadata: |
             {
               "platform": "Android",
@@ -71,14 +70,13 @@ jobs:
               "pr_number": ${{ github.event.number }},
               "branch": "${{ github.ref_name }}"
             }
-
+      
       - name: Verify Resolution
         uses: ./revyl-actions/actions/verify-resolution
         with:
           build-var-id: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
           version: ${{ env.VER }}
-          backend-url: ${{ secrets.REVYL_BASE_URL }}
-
+      
       - name: Trigger Tests (placeholder)
         run: |
           echo "✅ Would trigger test run with version: ${{ env.VER }}"
