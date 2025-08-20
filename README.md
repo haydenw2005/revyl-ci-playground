@@ -183,3 +183,22 @@ When testing `from_url` publishing (like the Expo workflow), ensure the URL poin
 - Test endpoints like `https://httpbin.org/bytes/1024`
 
 The Revyl API will attempt to download the file from the provided URL, so it must be publicly accessible and return the actual file content.
+
+## Recent Fixes Applied
+
+### ✅ Issues Resolved:
+
+1. **Node.js Warnings**: Replaced `ts-node/esm` with `tsx` for cleaner TypeScript execution
+2. **Package Lock Sync**: Updated `package-lock.json` to include `tsx` dependencies  
+3. **Expo URL 404**: Replaced fake `expo.dev` URL with real downloadable test URL (`httpbin.org/bytes/1024`)
+4. **API Schema Mismatch**: Added `version_id` to `complete-upload` request body as required by `BuildUploadCompleteRequest`
+5. **React Native Build**: Fixed missing dependencies and simplified `settings.gradle` for proper Gradle plugin loading
+
+### 🎯 Current Status:
+
+All three workflows should now complete successfully with proper Revyl credentials:
+- **Dummy**: Fast 200KB file upload via presigned URL
+- **Expo**: Test file download via `from_url` workflow  
+- **React Native**: Real Android APK build via Gradle + presigned upload
+
+The playground demonstrates both publishing methods (`from_url` and presigned upload) and verifies resolution works correctly.
