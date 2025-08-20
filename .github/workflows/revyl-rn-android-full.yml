@@ -55,7 +55,7 @@ jobs:
 
           # Build the APK (ignore exit code, we'll check for the APK file)
           ./gradlew assembleRelease --info || true
-          
+
           echo "📁 Checking build output directory..."
           ls -la app/build/outputs/apk/release/ || echo "Release directory doesn't exist yet"
 
