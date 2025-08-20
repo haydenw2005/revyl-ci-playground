@@ -156,3 +156,13 @@ revyl-ci-playground/
         ├── revyl-expo-android.yml
         └── revyl-rn-android.yml
 ```
+
+
+## 🧪 Test Run
+
+This PR tests all three workflows:
+- Dummy smoke test
+- Expo Android build  
+- React Native Android build
+
+Each workflow will attempt to publish to Revyl and trigger tests.
