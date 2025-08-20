@@ -38,9 +38,14 @@ jobs:
             exit 1
           fi
           echo "✅ Revyl credentials are configured"
-      - name: Install deps
+      - name: Install React Native dependencies
         working-directory: apps/rn-android-minimal
-        run: npm ci || true
+        run: |
+          echo "📦 Installing React Native dependencies..."
+          npm install
+          echo "✅ Dependencies installed"
+          echo "📋 Checking React Native Gradle plugin:"
+          ls -la node_modules/@react-native/gradle-plugin/ || echo "⚠️ Gradle plugin not found"
       - name: Build Android Release
         working-directory: apps/rn-android-minimal/android
         run: ./gradlew assembleRelease

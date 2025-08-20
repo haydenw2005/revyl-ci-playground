@@ -39,15 +39,15 @@ jobs:
           # For CI playground purposes, use a real downloadable test file
           echo "⚠️  Creating test build.json for from_url workflow testing"
           echo "In production, this would be a real EAS build with APK artifact"
-          
+
           # Use a small publicly available test file that we know exists and is downloadable
           # This tests the from_url workflow without requiring a real EAS build
           TEST_URL="https://github.com/android/testing-samples/raw/main/ui/espresso/BasicSample/app/build/outputs/apk/debug/app-debug.apk"
-          
+
           # Fallback to a simple test file if the above doesn't work
           # We'll use httpbin.org which provides test endpoints
           FALLBACK_URL="https://httpbin.org/bytes/1024"
-          
+
           cat > build.json << EOF
           {
             "builds": [
@@ -64,7 +64,7 @@ jobs:
             ]
           }
           EOF
-          
+
           echo "📋 Build.json created with downloadable test URL:"
           cat build.json
           echo ""

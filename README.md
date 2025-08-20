@@ -167,3 +167,19 @@ This PR tests all three workflows:
 - React Native Android build
 
 Each workflow will attempt to publish to Revyl and trigger tests.
+
+### Troubleshooting from_url Workflows
+
+When testing `from_url` publishing (like the Expo workflow), ensure the URL points to a **real, downloadable file**:
+
+**❌ Bad URLs:**
+- `https://expo.dev/artifacts/dummy-build-url.apk` (fake/non-existent)
+- `https://example.com/build.apk` (placeholder domain)
+- Local file paths or private URLs
+
+**✅ Good URLs:**
+- Real EAS build artifacts from `eas build --json`
+- Public file hosting services
+- Test endpoints like `https://httpbin.org/bytes/1024`
+
+The Revyl API will attempt to download the file from the provided URL, so it must be publicly accessible and return the actual file content.

@@ -79,9 +79,9 @@ async function main() {
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         version_id: version_id,
-        metadata 
+        metadata,
       }),
     });
 
