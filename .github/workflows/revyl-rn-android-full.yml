@@ -1,0 +1,91 @@
+name: Revyl RN Android (Full Build) → Publish pinned → Verify → Trigger tests
+
+on:
+  workflow_dispatch: # Manual trigger only for full builds
+
+permissions:
+  contents: read
+
+jobs:
+  rn-android-full:
+    runs-on: ubuntu-latest
+    env:
+      REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
+      VER: rn-full-pr-${{ github.event.number || 'manual' }}-run-${{ github.run_number }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout Revyl Actions
+        uses: actions/checkout@v4
+        with:
+          repository: RevylAI/revyl-gh-action
+          path: revyl-actions
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install React Native dependencies
+        working-directory: apps/rn-android-minimal
+        run: |
+          echo "📦 Installing React Native dependencies..."
+          npm install
+          echo "✅ Dependencies installed"
+
+      - name: Fix Metro configuration for CI
+        working-directory: apps/rn-android-minimal
+        run: |
+          # Create a simpler metro config that works in CI
+          cat > metro.config.js << 'EOF'
+          const {getDefaultConfig} = require('@react-native/metro-config');
+          module.exports = getDefaultConfig(__dirname);
+          EOF
+
+          # Use a simpler babel config
+          cat > babel.config.js << 'EOF'
+          module.exports = {
+            presets: ['@react-native/babel-preset'],
+          };
+          EOF
+
+      - name: Build Full Android Release APK
+        working-directory: apps/rn-android-minimal/android
+        run: |
+          echo "🔧 Building full installable Android APK"
+          ./gradlew assembleRelease --info
+          echo "✅ APK built: $(ls -lh app/build/outputs/apk/release/*.apk)"
+
+      - name: Upload to Revyl
+        uses: ./revyl-actions/actions/upload-build
+        with:
+          build-var-id: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
+          version: ${{ env.VER }}
+          file-path: apps/rn-android-minimal/android/app/build/outputs/apk/release/app-release.apk
+          metadata: |
+            {
+              "platform": "Android",
+              "app_id": "com.revyl.rn.full",
+              "build_system": "gradle-full",
+              "installable": true,
+              "ci_run_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+              "commit_sha": "${{ github.sha }}",
+              "branch": "${{ github.ref_name }}"
+            }
+
+      - name: Verify Resolution
+        uses: ./revyl-actions/actions/verify-resolution
+        with:
+          build-var-id: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
+          version: ${{ env.VER }}
+
+      - name: Test APK Installation (optional)
+        run: |
+          echo "✅ Full APK built and uploaded: ${{ env.VER }}"
+          echo "This APK should be installable on Android devices"
+          echo "It contains the complete React Native bundle and assets"

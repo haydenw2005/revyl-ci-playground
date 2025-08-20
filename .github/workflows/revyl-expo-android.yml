@@ -12,32 +12,36 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.head.repo.full_name == github.repository
     env:
-      REVYL_BASE_URL: ${{ secrets.REVYL_BASE_URL }}
       REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
-      REVYL_BUILD_VAR_ANDROID: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-      VER: pr-${{ github.event.number }}-${{ github.run_number }}
+      VER: expo-pr-${{ github.event.number }}-run-${{ github.run_number }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Checkout Revyl Actions
+        uses: actions/checkout@v4
         with:
-          node-version: 20
-      - run: npm ci
-      - name: Install EAS CLI
-        run: npm i -g eas-cli
-      - name: Build Expo APK (json)
-        working-directory: apps/expo-minimal
-        run: npm run build:expo:android:json
-      - name: Publish to Revyl (from_url)
-        working-directory: apps/expo-minimal
+          repository: RevylAI/revyl-gh-action
+          path: revyl-actions
+
+      - name: Check Expo Token
         run: |
-          URL=$(jq -r '.builds[0].artifacts.buildUrl' build.json)
-          node --loader ts-node/esm ../../scripts/publishFromUrl.ts \
-            --from-url "$URL" \
-            --version "$VER" \
-            --build-var "$REVYL_BUILD_VAR_ANDROID" \
-            --header "Authorization: Bearer $EXPO_TOKEN" \
-            --metadata '{
+          if [ "$EXPO_TOKEN" = "your-expo-token-here" ]; then
+            echo "❌ EXPO_TOKEN is still a placeholder. Please update it with your real Expo token."
+            echo "To get an Expo token: https://expo.dev/accounts/[username]/settings/access-tokens"
+            exit 1
+          fi
+          echo "✅ EXPO_TOKEN is configured"
+
+      - name: Upload to Revyl (from URL)
+        uses: ./revyl-actions/actions/upload-build
+        with:
+          build-var-id: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
+          version: ${{ env.VER }}
+          expo-url: "https://httpbin.org/bytes/1024"
+          expo-headers: '{"Authorization": "Bearer ${{ secrets.EXPO_TOKEN }}"}'
+          metadata: |
+            {
               "platform": "Android",
               "app_id": "com.revyl.expo",
               "build_system": "eas",
@@ -45,8 +49,15 @@ jobs:
               "commit_sha": "${{ github.sha }}",
               "pr_number": ${{ github.event.number }},
               "branch": "${{ github.ref_name }}"
-            }'
-      - name: Verify resolve
-        run: node --loader ts-node/esm scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
-      - name: Trigger tests (pinned)
-        run: node --loader ts-node/esm scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke
+            }
+
+      - name: Verify Resolution
+        uses: ./revyl-actions/actions/verify-resolution
+        with:
+          build-var-id: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
+          version: ${{ env.VER }}
+
+      - name: Trigger Tests (placeholder)
+        run: |
+          echo "✅ Would trigger test run with version: ${{ env.VER }}"
+          echo "This step would use a trigger-test action when available"

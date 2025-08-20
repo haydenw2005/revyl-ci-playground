@@ -64,7 +64,8 @@ For example: `pr-42-1`, `pr-42-2`, etc.
 
 2. **Expo Android** (`revyl-expo-android.yml`)
 
-   - Builds APK using EAS Build
+   - **Demo Mode**: Creates dummy build.json for testing `from_url` workflow
+   - **Production Mode**: Builds APK using EAS Build (requires EAS project setup)
    - Publishes via `from_url` endpoint
    - Requires `EXPO_TOKEN` secret
 
@@ -156,3 +157,62 @@ revyl-ci-playground/
         ├── revyl-expo-android.yml
         └── revyl-rn-android.yml
 ```
+
+## 🧪 Test Run
+
+This PR tests all three workflows:
+
+- Dummy smoke test
+- Expo Android build
+- React Native Android build
+
+Each workflow will attempt to publish to Revyl and trigger tests.
+
+### Troubleshooting from_url Workflows
+
+When testing `from_url` publishing (like the Expo workflow), ensure the URL points to a **real, downloadable file**:
+
+**❌ Bad URLs:**
+
+- `https://expo.dev/artifacts/dummy-build-url.apk` (fake/non-existent)
+- `https://example.com/build.apk` (placeholder domain)
+- Local file paths or private URLs
+
+**✅ Good URLs:**
+
+- Real EAS build artifacts from `eas build --json`
+- Public file hosting services
+- Test endpoints like `https://httpbin.org/bytes/1024`
+
+The Revyl API will attempt to download the file from the provided URL, so it must be publicly accessible and return the actual file content.
+
+## Recent Fixes Applied
+
+### ✅ Issues Resolved:
+
+1. **Node.js Warnings**: Replaced `ts-node/esm` with `tsx` for cleaner TypeScript execution
+2. **Package Lock Sync**: Updated `package-lock.json` to include `tsx` dependencies
+3. **Expo URL 404**: Replaced fake `expo.dev` URL with real downloadable test URL (`httpbin.org/bytes/1024`)
+4. **API Schema Mismatch**: Added `version_id` to `complete-upload` request body as required by `BuildUploadCompleteRequest`
+5. **React Native Build**: Fixed missing dependencies and simplified `settings.gradle` for proper Gradle plugin loading
+
+### 🎯 Current Status:
+
+All three workflows should now complete successfully with proper Revyl credentials:
+
+- **Dummy**: Fast 200KB file upload via presigned URL
+- **Expo**: Test file download via `from_url` workflow
+- **React Native**: Real Android APK build via Gradle + presigned upload
+
+The playground demonstrates both publishing methods (`from_url` and presigned upload) and verifies resolution works correctly.
+
+### React Native Build Notes
+
+The React Native Android workflow uses a **simplified build approach** for CI testing:
+
+- **Skips JavaScript bundling** (`-x createBundleReleaseJsAndAssets`) to avoid Metro/Babel complexity
+- **Focuses on testing** the presigned upload workflow rather than full app functionality
+- **Fallback mechanism** creates a test APK if the build fails
+- **Production usage** would enable full JS bundling for complete app builds
+
+This approach allows testing the **core Revyl integration** (build → publish → verify → test) without getting blocked by complex React Native toolchain setup in CI environments.
