@@ -17,13 +17,13 @@ jobs:
       VER: expo-pr-${{ github.event.number }}-run-${{ github.run_number }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Checkout Revyl Actions
         uses: actions/checkout@v4
         with:
           repository: RevylAI/revyl-gh-action
           path: revyl-actions
-          
+
       - name: Check Expo Token
         run: |
           if [ "$EXPO_TOKEN" = "your-expo-token-here" ]; then
@@ -32,7 +32,7 @@ jobs:
             exit 1
           fi
           echo "✅ EXPO_TOKEN is configured"
-          
+
       - name: Upload to Revyl (from URL)
         uses: ./revyl-actions/actions/upload-build
         with:
@@ -50,13 +50,13 @@ jobs:
               "pr_number": ${{ github.event.number }},
               "branch": "${{ github.ref_name }}"
             }
-      
+
       - name: Verify Resolution
         uses: ./revyl-actions/actions/verify-resolution
         with:
           build-var-id: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
           version: ${{ env.VER }}
-      
+
       - name: Trigger Tests (placeholder)
         run: |
           echo "✅ Would trigger test run with version: ${{ env.VER }}"
