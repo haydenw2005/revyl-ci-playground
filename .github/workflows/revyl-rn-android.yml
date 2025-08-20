@@ -1,0 +1,55 @@
+name: Revyl RN Android → Publish pinned → Verify → Trigger tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  rn-android:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    env:
+      REVYL_BASE_URL: ${{ secrets.REVYL_BASE_URL }}
+      REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
+      REVYL_BUILD_VAR_ANDROID: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
+      VER: pr-${{ github.event.number }}-${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install deps
+        working-directory: apps/rn-android-minimal
+        run: npm ci || true
+      - name: Build Android Release
+        working-directory: apps/rn-android-minimal/android
+        run: ./gradlew assembleRelease
+      - name: Publish (presigned)
+        run: |
+          FILE=$(ls -1 apps/rn-android-minimal/android/app/build/outputs/apk/release/*.apk | head -n1)
+          node --loader ts-node/esm scripts/publishPresigned.ts \
+            --file "$FILE" \
+            --version "$VER" \
+            --build-var "$REVYL_BUILD_VAR_ANDROID" \
+            --metadata '{
+              "platform": "Android",
+              "app_id": "com.revyl.rn",
+              "build_system": "gradle",
+              "ci_run_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+              "commit_sha": "${{ github.sha }}",
+              "pr_number": ${{ github.event.number }},
+              "branch": "${{ github.ref_name }}"
+            }'
+      - name: Verify resolve
+        run: node --loader ts-node/esm scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
+      - name: Trigger tests (pinned)
+        run: node --loader ts-node/esm scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke

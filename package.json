@@ -1,0 +1,35 @@
+{
+  "name": "revyl-ci-playground",
+  "version": "1.0.0",
+  "description": "CI playground for testing Revyl build ingestion from real pipelines",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'No build step required'",
+    "lint": "echo 'No linting configured'",
+    "play:dummy": "node --loader ts-node/esm scripts/publishPresigned.ts --file dummy.apk --version test-dummy-1 --build-var $REVYL_BUILD_VAR_ANDROID --metadata '{\"platform\":\"Android\",\"app_id\":\"com.revyl.dummy\",\"build_system\":\"dummy\"}'",
+    "play:expo": "node --loader ts-node/esm scripts/publishFromUrl.ts --from-url https://example.com/build.apk --version test-expo-1 --build-var $REVYL_BUILD_VAR_ANDROID --header \"Authorization: Bearer $EXPO_TOKEN\" --metadata '{\"platform\":\"Android\",\"app_id\":\"com.revyl.expo\",\"build_system\":\"eas\"}'",
+    "play:rn": "node --loader ts-node/esm scripts/publishPresigned.ts --file sample.apk --version test-rn-1 --build-var $REVYL_BUILD_VAR_ANDROID --metadata '{\"platform\":\"Android\",\"app_id\":\"com.revyl.rn\",\"build_system\":\"gradle\"}'"
+  },
+  "keywords": [
+    "revyl",
+    "ci",
+    "testing",
+    "android",
+    "expo",
+    "react-native"
+  ],
+  "author": "Revyl Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

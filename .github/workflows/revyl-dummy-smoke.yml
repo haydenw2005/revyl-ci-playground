@@ -1,0 +1,45 @@
+name: Revyl Dummy → Publish pinned → Verify → Trigger tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  dummy:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    env:
+      REVYL_BASE_URL: ${{ secrets.REVYL_BASE_URL }}
+      REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
+      REVYL_BUILD_VAR_ANDROID: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
+      VER: pr-${{ github.event.number }}-${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Make tiny artifact
+        run: dd if=/dev/urandom of=artifact.apk bs=1024 count=200
+      - name: Publish (presigned)
+        run: |
+          node --loader ts-node/esm scripts/publishPresigned.ts \
+            --file artifact.apk \
+            --version "$VER" \
+            --build-var "$REVYL_BUILD_VAR_ANDROID" \
+            --metadata '{
+              "platform": "Android",
+              "app_id": "com.revyl.dummy",
+              "build_system": "dummy",
+              "ci_run_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+              "commit_sha": "${{ github.sha }}",
+              "pr_number": ${{ github.event.number }},
+              "branch": "${{ github.ref_name }}"
+            }'
+      - name: Verify resolve
+        run: node --loader ts-node/esm scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
+      - name: Trigger tests (pinned)
+        run: node --loader ts-node/esm scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke
