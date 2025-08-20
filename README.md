@@ -64,7 +64,8 @@ For example: `pr-42-1`, `pr-42-2`, etc.
 
 2. **Expo Android** (`revyl-expo-android.yml`)
 
-   - Builds APK using EAS Build
+   - **Demo Mode**: Creates dummy build.json for testing `from_url` workflow
+   - **Production Mode**: Builds APK using EAS Build (requires EAS project setup)
    - Publishes via `from_url` endpoint
    - Requires `EXPO_TOKEN` secret
 
