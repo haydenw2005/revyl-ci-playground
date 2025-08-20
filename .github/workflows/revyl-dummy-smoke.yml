@@ -22,6 +22,8 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - name: Install tsx globally
+        run: npm install -g tsx
       - name: Check Revyl Credentials
         run: |
           if [ "$REVYL_API_KEY" = "your-revyl-api-key-here" ]; then
@@ -37,7 +39,7 @@ jobs:
         run: dd if=/dev/urandom of=artifact.apk bs=1024 count=200
       - name: Publish (presigned)
         run: |
-          npx tsx scripts/publishPresigned.ts \
+          tsx scripts/publishPresigned.ts \
             --file artifact.apk \
             --version "$VER" \
             --build-var "$REVYL_BUILD_VAR_ANDROID" \
@@ -51,6 +53,6 @@ jobs:
               "branch": "${{ github.ref_name }}"
             }'
       - name: Verify resolve
-        run: npx tsx scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
+        run: tsx scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
       - name: Trigger tests (pinned)
-        run: npx tsx scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke
+        run: tsx scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke

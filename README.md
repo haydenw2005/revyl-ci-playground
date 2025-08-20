@@ -202,3 +202,14 @@ All three workflows should now complete successfully with proper Revyl credentia
 - **React Native**: Real Android APK build via Gradle + presigned upload
 
 The playground demonstrates both publishing methods (`from_url` and presigned upload) and verifies resolution works correctly.
+
+### React Native Build Notes
+
+The React Native Android workflow uses a **simplified build approach** for CI testing:
+
+- **Skips JavaScript bundling** (`-x createBundleReleaseJsAndAssets`) to avoid Metro/Babel complexity
+- **Focuses on testing** the presigned upload workflow rather than full app functionality  
+- **Fallback mechanism** creates a test APK if the build fails
+- **Production usage** would enable full JS bundling for complete app builds
+
+This approach allows testing the **core Revyl integration** (build → publish → verify → test) without getting blocked by complex React Native toolchain setup in CI environments.

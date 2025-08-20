@@ -23,6 +23,8 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - name: Install tsx globally
+        run: npm install -g tsx
       - name: Install EAS CLI
         run: npm i -g eas-cli
       - name: Check Expo Token
@@ -74,7 +76,7 @@ jobs:
         working-directory: apps/expo-minimal
         run: |
           URL=$(jq -r '.builds[0].artifacts.buildUrl' build.json)
-          npx tsx ../../scripts/publishFromUrl.ts \
+          tsx ../../scripts/publishFromUrl.ts \
             --from-url "$URL" \
             --version "$VER" \
             --build-var "$REVYL_BUILD_VAR_ANDROID" \
@@ -89,6 +91,6 @@ jobs:
               "branch": "${{ github.ref_name }}"
             }'
       - name: Verify resolve
-        run: npx tsx scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
+        run: tsx scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
       - name: Trigger tests (pinned)
-        run: npx tsx scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke
+        run: tsx scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke
