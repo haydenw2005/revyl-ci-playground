@@ -25,6 +25,14 @@ jobs:
       - run: npm ci
       - name: Install EAS CLI
         run: npm i -g eas-cli
+      - name: Check Expo Token
+        run: |
+          if [ "$EXPO_TOKEN" = "your-expo-token-here" ]; then
+            echo "❌ EXPO_TOKEN is still a placeholder. Please update it with your real Expo token."
+            echo "To get an Expo token: https://expo.dev/accounts/[username]/settings/access-tokens"
+            exit 1
+          fi
+          echo "✅ EXPO_TOKEN is configured"
       - name: Build Expo APK (json)
         working-directory: apps/expo-minimal
         run: npm run build:expo:android:json

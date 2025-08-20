@@ -22,6 +22,17 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - name: Check Revyl Credentials
+        run: |
+          if [ "$REVYL_API_KEY" = "your-revyl-api-key-here" ]; then
+            echo "❌ REVYL_API_KEY is still a placeholder. Please update it with your real Revyl API key."
+            exit 1
+          fi
+          if [ "$REVYL_BUILD_VAR_ANDROID" = "your-build-var-uuid-here" ]; then
+            echo "❌ REVYL_BUILD_VAR_ANDROID is still a placeholder. Please update it with your real build variable UUID."
+            exit 1
+          fi
+          echo "✅ Revyl credentials are configured"
       - name: Make tiny artifact
         run: dd if=/dev/urandom of=artifact.apk bs=1024 count=200
       - name: Publish (presigned)
