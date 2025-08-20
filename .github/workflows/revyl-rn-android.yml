@@ -15,7 +15,7 @@ jobs:
       REVYL_BASE_URL: ${{ secrets.REVYL_BASE_URL }}
       REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
       REVYL_BUILD_VAR_ANDROID: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
-      VER: pr-${{ github.event.number }}-${{ github.run_number }}
+      VER: rn-pr-${{ github.event.number }}-run-${{ github.run_number }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

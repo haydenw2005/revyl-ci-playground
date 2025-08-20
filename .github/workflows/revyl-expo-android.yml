@@ -1,96 +1,96 @@
-name: Revyl Expo (EAS) → Publish pinned → Verify → Trigger tests
+# name: Revyl Expo (EAS) → Publish pinned → Verify → Trigger tests
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+# on:
+#   pull_request:
+#     types: [opened, synchronize, reopened]
 
-permissions:
-  contents: read
+# permissions:
+#   contents: read
 
-jobs:
-  expo-android:
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    env:
-      REVYL_BASE_URL: ${{ secrets.REVYL_BASE_URL }}
-      REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
-      REVYL_BUILD_VAR_ANDROID: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
-      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-      VER: pr-${{ github.event.number }}-${{ github.run_number }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - name: Install tsx globally
-        run: npm install -g tsx
-      - name: Install EAS CLI
-        run: npm i -g eas-cli
-      - name: Check Expo Token
-        run: |
-          if [ "$EXPO_TOKEN" = "your-expo-token-here" ]; then
-            echo "❌ EXPO_TOKEN is still a placeholder. Please update it with your real Expo token."
-            echo "To get an Expo token: https://expo.dev/accounts/[username]/settings/access-tokens"
-            exit 1
-          fi
-          echo "✅ EXPO_TOKEN is configured"
-      - name: Create test build.json with downloadable URL
-        working-directory: apps/expo-minimal
-        run: |
-          # For CI playground purposes, use a real downloadable test file
-          echo "⚠️  Creating test build.json for from_url workflow testing"
-          echo "In production, this would be a real EAS build with APK artifact"
+# jobs:
+#   expo-android:
+#     runs-on: ubuntu-latest
+#     if: github.event.pull_request.head.repo.full_name == github.repository
+#     env:
+#       REVYL_BASE_URL: ${{ secrets.REVYL_BASE_URL }}
+#       REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
+#       REVYL_BUILD_VAR_ANDROID: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
+#       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+#       VER: expo-pr-${{ github.event.number }}-run-${{ github.run_number }}-${{ github.run_attempt }}
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+#       - run: npm ci
+#       - name: Install tsx globally
+#         run: npm install -g tsx
+#       - name: Install EAS CLI
+#         run: npm i -g eas-cli
+#       - name: Check Expo Token
+#         run: |
+#           if [ "$EXPO_TOKEN" = "your-expo-token-here" ]; then
+#             echo "❌ EXPO_TOKEN is still a placeholder. Please update it with your real Expo token."
+#             echo "To get an Expo token: https://expo.dev/accounts/[username]/settings/access-tokens"
+#             exit 1
+#           fi
+#           echo "✅ EXPO_TOKEN is configured"
+#       - name: Create test build.json with downloadable URL
+#         working-directory: apps/expo-minimal
+#         run: |
+#           # For CI playground purposes, use a real downloadable test file
+#           echo "⚠️  Creating test build.json for from_url workflow testing"
+#           echo "In production, this would be a real EAS build with APK artifact"
 
-          # Use a small publicly available test file that we know exists and is downloadable
-          # This tests the from_url workflow without requiring a real EAS build
-          TEST_URL="https://github.com/android/testing-samples/raw/main/ui/espresso/BasicSample/app/build/outputs/apk/debug/app-debug.apk"
+#           # Use a small publicly available test file that we know exists and is downloadable
+#           # This tests the from_url workflow without requiring a real EAS build
+#           TEST_URL="https://github.com/android/testing-samples/raw/main/ui/espresso/BasicSample/app/build/outputs/apk/debug/app-debug.apk"
 
-          # Fallback to a simple test file if the above doesn't work
-          # We'll use httpbin.org which provides test endpoints
-          FALLBACK_URL="https://httpbin.org/bytes/1024"
+#           # Fallback to a simple test file if the above doesn't work
+#           # We'll use httpbin.org which provides test endpoints
+#           FALLBACK_URL="https://httpbin.org/bytes/1024"
 
-          cat > build.json << EOF
-          {
-            "builds": [
-              {
-                "id": "test-build-${{ github.run_number }}",
-                "status": "finished",
-                "platform": "android",
-                "artifacts": {
-                  "buildUrl": "${FALLBACK_URL}"
-                },
-                "createdAt": "$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)",
-                "completedAt": "$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"
-              }
-            ]
-          }
-          EOF
+#           cat > build.json << EOF
+#           {
+#             "builds": [
+#               {
+#                 "id": "test-build-${{ github.run_number }}",
+#                 "status": "finished",
+#                 "platform": "android",
+#                 "artifacts": {
+#                   "buildUrl": "${FALLBACK_URL}"
+#                 },
+#                 "createdAt": "$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)",
+#                 "completedAt": "$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"
+#               }
+#             ]
+#           }
+#           EOF
 
-          echo "📋 Build.json created with downloadable test URL:"
-          cat build.json
-          echo ""
-          echo "🔍 Testing URL accessibility:"
-          curl -I "${FALLBACK_URL}" || echo "URL test completed"
-      - name: Publish to Revyl (from_url)
-        working-directory: apps/expo-minimal
-        run: |
-          URL=$(jq -r '.builds[0].artifacts.buildUrl' build.json)
-          tsx ../../scripts/publishFromUrl.ts \
-            --from-url "$URL" \
-            --version "$VER" \
-            --build-var "$REVYL_BUILD_VAR_ANDROID" \
-            --header "Authorization: Bearer $EXPO_TOKEN" \
-            --metadata '{
-              "platform": "Android",
-              "app_id": "com.revyl.expo",
-              "build_system": "eas",
-              "ci_run_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-              "commit_sha": "${{ github.sha }}",
-              "pr_number": ${{ github.event.number }},
-              "branch": "${{ github.ref_name }}"
-            }'
-      - name: Verify resolve
-        run: tsx scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
-      - name: Trigger tests (pinned)
-        run: tsx scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke
+#           echo "📋 Build.json created with downloadable test URL:"
+#           cat build.json
+#           echo ""
+#           echo "🔍 Testing URL accessibility:"
+#           curl -I "${FALLBACK_URL}" || echo "URL test completed"
+#       - name: Publish to Revyl (from_url)
+#         working-directory: apps/expo-minimal
+#         run: |
+#           URL=$(jq -r '.builds[0].artifacts.buildUrl' build.json)
+#           tsx ../../scripts/publishFromUrl.ts \
+#             --from-url "$URL" \
+#             --version "$VER" \
+#             --build-var "$REVYL_BUILD_VAR_ANDROID" \
+#             --header "Authorization: Bearer $EXPO_TOKEN" \
+#             --metadata '{
+#               "platform": "Android",
+#               "app_id": "com.revyl.expo",
+#               "build_system": "eas",
+#               "ci_run_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+#               "commit_sha": "${{ github.sha }}",
+#               "pr_number": ${{ github.event.number }},
+#               "branch": "${{ github.ref_name }}"
+#             }'
+#       - name: Verify resolve
+#         run: tsx scripts/verifyResolve.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER"
+#       - name: Trigger tests (pinned)
+#         run: tsx scripts/triggerTests.ts --build-var "$REVYL_BUILD_VAR_ANDROID" --version "$VER" --suite smoke
