@@ -1,5 +1,4 @@
-# Dependencies
-node_modules/
+# App dependencies
 */node_modules/
 
 # Build outputs
