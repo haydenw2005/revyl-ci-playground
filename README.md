@@ -212,7 +212,7 @@ The React Native Android workflow uses a **simplified build approach** for CI te
 
 - **Skips JavaScript bundling** (`-x createBundleReleaseJsAndAssets`) to avoid Metro/Babel complexity
 - **Focuses on testing** the presigned upload workflow rather than full app functionality
-- **Fallback mechanism** creates a test APK if the build fails
+- **Fallback mechanism** creates a test APK if the build fails\
 - **Production usage** would enable full JS bundling for complete app builds
 
 This approach allows testing the **core Revyl integration** (build → publish → verify → test) without getting blocked by complex React Native toolchain setup in CI environments.
