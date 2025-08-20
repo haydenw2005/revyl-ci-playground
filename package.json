@@ -7,9 +7,9 @@
   "scripts": {
     "build": "echo 'No build step required'",
     "lint": "echo 'No linting configured'",
-    "play:dummy": "node --loader ts-node/esm scripts/publishPresigned.ts --file dummy.apk --version test-dummy-1 --build-var $REVYL_BUILD_VAR_ANDROID --metadata '{\"platform\":\"Android\",\"app_id\":\"com.revyl.dummy\",\"build_system\":\"dummy\"}'",
-    "play:expo": "node --loader ts-node/esm scripts/publishFromUrl.ts --from-url https://example.com/build.apk --version test-expo-1 --build-var $REVYL_BUILD_VAR_ANDROID --header \"Authorization: Bearer $EXPO_TOKEN\" --metadata '{\"platform\":\"Android\",\"app_id\":\"com.revyl.expo\",\"build_system\":\"eas\"}'",
-    "play:rn": "node --loader ts-node/esm scripts/publishPresigned.ts --file sample.apk --version test-rn-1 --build-var $REVYL_BUILD_VAR_ANDROID --metadata '{\"platform\":\"Android\",\"app_id\":\"com.revyl.rn\",\"build_system\":\"gradle\"}'"
+    "play:dummy": "tsx scripts/publishPresigned.ts --file dummy.apk --version test-dummy-1 --build-var $REVYL_BUILD_VAR_ANDROID --metadata '{\"platform\":\"Android\",\"app_id\":\"com.revyl.dummy\",\"build_system\":\"dummy\"}'",
+    "play:expo": "tsx scripts/publishFromUrl.ts --from-url https://example.com/build.apk --version test-expo-1 --build-var $REVYL_BUILD_VAR_ANDROID --header \"Authorization: Bearer $EXPO_TOKEN\" --metadata '{\"platform\":\"Android\",\"app_id\":\"com.revyl.expo\",\"build_system\":\"eas\"}'",
+    "play:rn": "tsx scripts/publishPresigned.ts --file sample.apk --version test-rn-1 --build-var $REVYL_BUILD_VAR_ANDROID --metadata '{\"platform\":\"Android\",\"app_id\":\"com.revyl.rn\",\"build_system\":\"gradle\"}'"
   },
   "keywords": [
     "revyl",
