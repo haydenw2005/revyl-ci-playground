@@ -79,7 +79,10 @@ async function main() {
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({ metadata }),
+      body: JSON.stringify({ 
+        version_id: version_id,
+        metadata 
+      }),
     });
 
     console.log("✅ Successfully published via presigned upload");
