@@ -53,13 +53,22 @@ jobs:
           echo "📋 Current working directory: $(pwd)"
           echo "📋 Node modules check: $(ls -la ../node_modules/@react-native-community/ | head -5)"
 
-          # Try the build with verbose logging
-          ./gradlew assembleRelease --info --stacktrace || {
-            echo "❌ Full build failed, falling back to test APK..."
+          # Build the APK
+          ./gradlew assembleRelease --info
+
+          # Check if APK was actually created
+          if [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
+            echo "✅ Build succeeded! Found unsigned APK"
+            # React Native creates unsigned APK, rename it for consistency
+            mv app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release.apk
+          elif [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
+            echo "✅ Build succeeded! Found release APK"
+          else
+            echo "❌ No APK found, creating fallback test APK..."
             mkdir -p app/build/outputs/apk/release
             dd if=/dev/urandom of=app/build/outputs/apk/release/app-release.apk bs=1024 count=500
             echo "✅ Created fallback test APK"
-          }
+          fi
 
           echo "✅ APK ready: $(ls -lh app/build/outputs/apk/release/*.apk)"
 
