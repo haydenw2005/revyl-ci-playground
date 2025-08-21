@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Revyl Demo",
-    "slug": "revyl-expo-demo",
+    "slug": "revyl-playground",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

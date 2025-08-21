@@ -1,5 +1,5 @@
 {
-  "name": "revyl-expo-demo",
+  "name": "revyl-playground",
   "version": "1.0.0",
   "description": "A simple demo app for testing Revyl's Expo build pipeline",
   "main": "node_modules/expo/AppEntry.js",
