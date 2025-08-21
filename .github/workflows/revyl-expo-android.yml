@@ -48,7 +48,7 @@ jobs:
         working-directory: apps/expo-demo
         run: |
           echo "🔧 Initializing EAS project..."
-          eas init --non-interactive
+          eas init --non-interactive --force
 
       - name: Build Android APK with EAS
         working-directory: apps/expo-demo
