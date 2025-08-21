@@ -44,15 +44,15 @@ jobs:
         working-directory: apps/expo-demo
         run: |
           echo "🚀 Building Android APK with EAS..."
-          
+
           # Capture the build output to extract build ID
           BUILD_OUTPUT=$(eas build --platform android --non-interactive --no-wait 2>&1)
           echo "$BUILD_OUTPUT"
-          
+
           # Extract build ID from the logs URL
           BUILD_ID=$(echo "$BUILD_OUTPUT" | grep -o 'builds/[a-f0-9-]*' | sed 's/builds\///' | head -1)
           echo "📱 Build started with ID: $BUILD_ID"
-          
+
           if [ -n "$BUILD_ID" ]; then
             echo "✅ EAS build triggered successfully!"
             echo "🔗 Build logs: https://expo.dev/accounts/hxxw12/projects/revyl-playground/builds/$BUILD_ID"
@@ -65,7 +65,7 @@ jobs:
             echo "❌ Failed to extract build ID"
             BUILD_URL="https://httpbin.org/bytes/1024"
           fi
-          
+
           echo "BUILD_URL=$BUILD_URL" >> $GITHUB_ENV
 
       - name: Upload to Revyl (from EAS URL)
