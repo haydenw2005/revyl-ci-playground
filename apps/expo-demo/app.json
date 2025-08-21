@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.revyl.demo.expo"
@@ -28,22 +30,11 @@
     },
     "extra": {
       "buildSystem": "eas",
-      "revylDemo": true
+      "revylDemo": true,
+      "eas": {
+        "projectId": "22a996ae-d1f3-4462-b8fc-500829c379c5"
+      }
     },
-    "plugins": [
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "compileSdkVersion": 34,
-            "targetSdkVersion": 34,
-            "buildToolsVersion": "34.0.0"
-          },
-          "ios": {
-            "deploymentTarget": "13.4"
-          }
-        }
-      ]
-    ]
+    "plugins": []
   }
 }
