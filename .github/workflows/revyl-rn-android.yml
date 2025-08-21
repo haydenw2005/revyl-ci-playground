@@ -1,8 +1,7 @@
 name: Revyl RN Android → Publish pinned → Verify → Trigger tests
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_dispatch: # Manual trigger only for full builds
 
 permissions:
   contents: read

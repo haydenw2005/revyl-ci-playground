@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import {
+  Alert,
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  View,
   TouchableOpacity,
-  Alert,
+  View,
 } from "react-native";
 
 function App(): React.JSX.Element {
@@ -45,37 +45,37 @@ function App(): React.JSX.Element {
         <View style={styles.content}>
           <Text style={styles.title}>🚀 Revyl CI Playground</Text>
           <Text style={styles.subtitle}>React Native Android App</Text>
-          
+
           <View style={styles.counterContainer}>
             <Text style={styles.counterLabel}>Counter Value:</Text>
             <Text style={styles.counterValue}>{counter}</Text>
           </View>
 
           <View style={styles.buttonRow}>
-            <TouchableOpacity 
-              style={[styles.button, styles.decrementButton]} 
+            <TouchableOpacity
+              style={[styles.button, styles.decrementButton]}
               onPress={handleDecrement}
             >
               <Text style={styles.buttonText}>- Decrease</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.button, styles.incrementButton]} 
+
+            <TouchableOpacity
+              style={[styles.button, styles.incrementButton]}
               onPress={handleIncrement}
             >
               <Text style={styles.buttonText}>+ Increase</Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity 
-            style={[styles.button, styles.resetButton]} 
+          <TouchableOpacity
+            style={[styles.button, styles.resetButton]}
             onPress={handleReset}
           >
             <Text style={styles.buttonText}>🔄 Reset Counter</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.button, styles.colorButton]} 
+          <TouchableOpacity
+            style={[styles.button, styles.colorButton]}
             onPress={handleColorChange}
           >
             <Text style={styles.buttonText}>🎨 Change Background</Text>

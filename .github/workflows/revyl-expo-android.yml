@@ -23,6 +23,13 @@ jobs:
           repository: RevylAI/revyl-gh-action
           path: revyl-actions
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: apps/expo-demo/package-lock.json
+
       - name: Check Expo Token
         run: |
           if [ "$EXPO_TOKEN" = "your-expo-token-here" ]; then
@@ -32,18 +39,37 @@ jobs:
           fi
           echo "✅ EXPO_TOKEN is configured"
 
-      - name: Upload to Revyl (from URL)
+      - name: Install Expo CLI
+        run: npm install -g @expo/cli eas-cli
+
+      - name: Install Dependencies
+        working-directory: apps/expo-demo
+        run: npm install
+
+      - name: Build Android APK with EAS
+        working-directory: apps/expo-demo
+        run: |
+          echo "🚀 Building Android APK with EAS..."
+          eas build --platform android --profile ci --non-interactive --wait
+
+          # Get the build URL from EAS
+          BUILD_URL=$(eas build:list --platform android --status finished --limit 1 --json | jq -r '.[0].artifacts.buildUrl')
+          echo "📱 Build completed! APK URL: $BUILD_URL"
+          echo "BUILD_URL=$BUILD_URL" >> $GITHUB_ENV
+
+      - name: Upload to Revyl (from EAS URL)
         uses: ./revyl-actions/actions/upload-build
         with:
           build-var-id: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
           version: ${{ env.VER }}
-          expo-url: "https://httpbin.org/bytes/1024"
+          expo-url: ${{ env.BUILD_URL }}
           expo-headers: '{"Authorization": "Bearer ${{ secrets.EXPO_TOKEN }}"}'
           metadata: |
             {
               "platform": "Android",
-              "app_id": "com.revyl.expo",
+              "app_id": "com.revyl.demo.expo",
               "build_system": "eas",
+              "expo_build_id": "${{ env.BUILD_ID }}",
               "ci_run_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
               "commit_sha": "${{ github.sha }}",
               "pr_number": ${{ github.event.number || 'null' }},
