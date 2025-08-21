@@ -44,6 +44,12 @@ jobs:
         working-directory: apps/expo-demo
         run: npm install
 
+      - name: Initialize EAS Project
+        working-directory: apps/expo-demo
+        run: |
+          echo "🔧 Initializing EAS project..."
+          eas init --non-interactive
+
       - name: Build Android APK with EAS
         working-directory: apps/expo-demo
         run: |
