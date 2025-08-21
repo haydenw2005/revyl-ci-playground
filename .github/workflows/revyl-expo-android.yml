@@ -13,6 +13,7 @@ jobs:
     env:
       REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      BUILD_VAR_ID: "88e8ae76-9136-4600-a0d1-f87e1139e63a"
       VER: expo-${{ github.event_name == 'workflow_dispatch' && 'manual' || format('pr-{0}', github.event.number) }}-run-${{ github.run_number }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
@@ -44,41 +45,35 @@ jobs:
         working-directory: apps/expo-demo
         run: |
           echo "🚀 Building Android APK with EAS (this will take 15-20 minutes)..."
-          
+
           # Build and wait for completion
           BUILD_OUTPUT=$(eas build --platform android --non-interactive --wait 2>&1)
           echo "$BUILD_OUTPUT"
-          
-          # Extract build ID from the logs URL
+
+                    # Extract build ID and APK URL directly from build output
           BUILD_ID=$(echo "$BUILD_OUTPUT" | grep -o 'builds/[a-f0-9-]*' | sed 's/builds\///' | head -1)
+          BUILD_URL=$(echo "$BUILD_OUTPUT" | grep -o 'https://expo.dev/artifacts/eas/[^[:space:]]*\.apk')
+
           echo "📱 Build ID: $BUILD_ID"
-          
-          if [ -n "$BUILD_ID" ]; then
+          echo "📱 APK URL: $BUILD_URL"
+
+          if [ -n "$BUILD_URL" ]; then
             echo "✅ EAS build completed successfully!"
             echo "🔗 Build logs: https://expo.dev/accounts/hxxw12/projects/revyl-playground/builds/$BUILD_ID"
-            
-            # Get the actual build URL from EAS
-            echo "📥 Getting build artifact URL..."
-            BUILD_LIST=$(eas build:list --platform android --limit 1 --json)
-            BUILD_URL=$(echo "$BUILD_LIST" | jq -r '.[0].artifacts.buildUrl // empty')
-            
-            if [ -n "$BUILD_URL" ] && [ "$BUILD_URL" != "null" ]; then
-              echo "📱 Real APK URL: $BUILD_URL"
-            else
-              echo "❌ Failed to get build URL, using fallback"
-              BUILD_URL="https://httpbin.org/bytes/1024"
-            fi
+            echo "📱 Real APK URL: $BUILD_URL"
           else
-            echo "❌ Failed to extract build ID"
-            BUILD_URL="https://httpbin.org/bytes/1024"
+            echo "❌ Failed to extract APK URL from build output"
+            echo "🔍 Build output for debugging:"
+            echo "$BUILD_OUTPUT"
+            exit 1
           fi
-          
+
           echo "BUILD_URL=$BUILD_URL" >> $GITHUB_ENV
 
       - name: Upload to Revyl (from EAS URL)
         uses: ./revyl-actions/actions/upload-build
         with:
-          build-var-id: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
+          build-var-id: ${{ env.BUILD_VAR_ID }}
           version: ${{ env.VER }}
           expo-url: ${{ env.BUILD_URL }}
           expo-headers: '{"Authorization": "Bearer ${{ secrets.EXPO_TOKEN }}"}'
@@ -87,7 +82,7 @@ jobs:
               "platform": "Android",
               "app_id": "com.revyl.demo.expo",
               "build_system": "eas",
-              "expo_build_id": "${{ env.BUILD_ID }}",
+              "expo_build_id": "$BUILD_ID",
               "ci_run_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
               "commit_sha": "${{ github.sha }}",
               "pr_number": ${{ github.event.number || 'null' }},
@@ -97,7 +92,7 @@ jobs:
       - name: Verify Resolution
         uses: ./revyl-actions/actions/verify-resolution
         with:
-          build-var-id: ${{ vars.REVYL_BUILD_VAR_ANDROID }}
+          build-var-id: ${{ env.BUILD_VAR_ID }}
           version: ${{ env.VER }}
 
       - name: Trigger Tests (placeholder)
