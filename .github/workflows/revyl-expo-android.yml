@@ -50,14 +50,13 @@ jobs:
           echo "🔧 Initializing EAS project..."
           eas init --non-interactive --force
 
-      - name: Skip EAS Build and Use Test APK
+      - name: Skip EAS Build and Use Test URL
         working-directory: apps/expo-demo
         run: |
           echo "🚀 Skipping EAS build due to keystore issues..."
-          echo "📱 Using test APK URL for now..."
-          # For now, let's use a working test APK URL until we resolve credentials
-          BUILD_URL="https://github.com/expo/expo/releases/download/sdk-50.0.0/Expo%20Go%20-%20v2.29.4.apk"
-          echo "📱 Using test APK URL: $BUILD_URL"
+          echo "📱 Using httpbin test URL to verify pipeline works..."
+          BUILD_URL="https://httpbin.org/bytes/1024"
+          echo "📱 Using test URL: $BUILD_URL"
           echo "BUILD_URL=$BUILD_URL" >> $GITHUB_ENV
 
       - name: Upload to Revyl (from EAS URL)
