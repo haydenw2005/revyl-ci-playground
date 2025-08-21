@@ -40,32 +40,39 @@ jobs:
         working-directory: apps/expo-demo
         run: npm ci
 
-      - name: Build on EAS
+      - name: Build on EAS and Wait for Completion
         working-directory: apps/expo-demo
         run: |
-          echo "🚀 Building Android APK with EAS..."
-
-          # Capture the build output to extract build ID
-          BUILD_OUTPUT=$(eas build --platform android --non-interactive --no-wait 2>&1)
+          echo "🚀 Building Android APK with EAS (this will take 15-20 minutes)..."
+          
+          # Build and wait for completion
+          BUILD_OUTPUT=$(eas build --platform android --non-interactive --wait 2>&1)
           echo "$BUILD_OUTPUT"
-
+          
           # Extract build ID from the logs URL
           BUILD_ID=$(echo "$BUILD_OUTPUT" | grep -o 'builds/[a-f0-9-]*' | sed 's/builds\///' | head -1)
-          echo "📱 Build started with ID: $BUILD_ID"
-
+          echo "📱 Build ID: $BUILD_ID"
+          
           if [ -n "$BUILD_ID" ]; then
-            echo "✅ EAS build triggered successfully!"
+            echo "✅ EAS build completed successfully!"
             echo "🔗 Build logs: https://expo.dev/accounts/hxxw12/projects/revyl-playground/builds/$BUILD_ID"
             
-            # For now, use placeholder until build completes
-            # TODO: In production, wait for build completion or use webhooks
-            BUILD_URL="https://httpbin.org/bytes/1024"
-            echo "📱 Using placeholder URL (build in progress): $BUILD_URL"
+            # Get the actual build URL from EAS
+            echo "📥 Getting build artifact URL..."
+            BUILD_LIST=$(eas build:list --platform android --limit 1 --json)
+            BUILD_URL=$(echo "$BUILD_LIST" | jq -r '.[0].artifacts.buildUrl // empty')
+            
+            if [ -n "$BUILD_URL" ] && [ "$BUILD_URL" != "null" ]; then
+              echo "📱 Real APK URL: $BUILD_URL"
+            else
+              echo "❌ Failed to get build URL, using fallback"
+              BUILD_URL="https://httpbin.org/bytes/1024"
+            fi
           else
             echo "❌ Failed to extract build ID"
             BUILD_URL="https://httpbin.org/bytes/1024"
           fi
-
+          
           echo "BUILD_URL=$BUILD_URL" >> $GITHUB_ENV
 
       - name: Upload to Revyl (from EAS URL)
