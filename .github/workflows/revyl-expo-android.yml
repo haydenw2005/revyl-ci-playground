@@ -54,7 +54,8 @@ jobs:
         working-directory: apps/expo-demo
         run: |
           echo "🚀 Building Android APK with EAS..."
-          eas build --platform android --profile preview --non-interactive --wait
+          echo "🔑 Attempting build with production profile..."
+          eas build --platform android --profile production --non-interactive --wait
 
           # Get the build URL from EAS
           BUILD_URL=$(eas build:list --platform android --status finished --limit 1 --json | jq -r '.[0].artifacts.buildUrl')
