@@ -9,11 +9,11 @@ permissions:
 jobs:
   expo-android:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     env:
       REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-      VER: expo-pr-${{ github.event.number }}-run-${{ github.run_number }}-${{ github.run_attempt }}
+      VER: expo-${{ github.event_name == 'workflow_dispatch' && 'manual' || format('pr-{0}', github.event.number) }}-run-${{ github.run_number }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
 
@@ -46,7 +46,7 @@ jobs:
               "build_system": "eas",
               "ci_run_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
               "commit_sha": "${{ github.sha }}",
-              "pr_number": ${{ github.event.number }},
+              "pr_number": ${{ github.event.number || 'null' }},
               "branch": "${{ github.ref_name }}"
             }
 
