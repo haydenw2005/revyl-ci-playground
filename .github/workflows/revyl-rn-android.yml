@@ -12,6 +12,7 @@ jobs:
     env:
       REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
       BUILD_VAR_ID: "c086b895-33a5-43b3-a2a2-ec914e74cf3f"
+      TEST_ID: "36b62d92-9f94-469d-a34d-30612836c798"
       VER: rn-full-pr-${{ github.event.number || 'manual' }}-run-${{ github.run_number }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
@@ -99,8 +100,17 @@ jobs:
           build-var-id: ${{ env.BUILD_VAR_ID }}
           version: ${{ env.VER }}
 
-      - name: Test APK Installation (optional)
+      - name: Run Revyl Tests
+        uses: ./revyl-actions/actions/run-test
+        with:
+          test-id: ${{ env.TEST_ID }}
+          timeout: 1800
+          poll-interval: 30
+        env:
+          REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
+
+      - name: Test Results Summary
         run: |
           echo "✅ Full APK built and uploaded: ${{ env.VER }}"
           echo "This APK should be installable on Android devices"
-          echo "Download it from Revyl to test installation"
+          echo "Revyl tests completed - check logs above for results"

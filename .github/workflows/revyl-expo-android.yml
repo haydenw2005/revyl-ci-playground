@@ -14,6 +14,7 @@ jobs:
       REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
       BUILD_VAR_ID: "88e8ae76-9136-4600-a0d1-f87e1139e63a"
+      TEST_ID: "935a9cdf-8da2-4937-ba64-23e08c702bfb"
       VER: expo-${{ github.event_name == 'workflow_dispatch' && 'manual' || format('pr-{0}', github.event.number) }}-run-${{ github.run_number }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
@@ -95,7 +96,11 @@ jobs:
           build-var-id: ${{ env.BUILD_VAR_ID }}
           version: ${{ env.VER }}
 
-      - name: Trigger Tests (placeholder)
-        run: |
-          echo "✅ Would trigger test run with version: ${{ env.VER }}"
-          echo "This step would use a trigger-test action when available"
+      - name: Run Revyl Tests
+        uses: ./revyl-actions/actions/run-test
+        with:
+          test-id: ${{ env.TEST_ID }}
+          timeout: 1800
+          poll-interval: 30
+        env:
+          REVYL_API_KEY: ${{ secrets.REVYL_API_KEY }}
